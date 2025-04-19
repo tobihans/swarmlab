@@ -1,0 +1,1 @@
+# Trying Docker Swarm mode
