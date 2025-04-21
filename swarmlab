@@ -33,7 +33,7 @@ _setup_project() {
   incus project show "$INCUS_PROJECT" >/dev/null || incus project create "$INCUS_PROJECT" <./config/project.yml
   incus project switch "$INCUS_PROJECT"
 
-  trap revert EXIT
+  trap revert EXIT INT ABRT TERM
 }
 
 _up() {
