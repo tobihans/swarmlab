@@ -48,6 +48,12 @@ _up() {
   done
 }
 
+_down() {
+  for i in {1..3}; do
+    incus delete --force "manager$i" "worker$i"
+  done
+}
+
 _start() {
   for i in {1..3}; do
     incus start "manager$i" "worker$i"
