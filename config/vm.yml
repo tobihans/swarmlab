@@ -11,6 +11,7 @@ config:
     packages:
       - ca-certificates
       - curl
+      - openssh-server
     power_state:
       condition: true
       delay: 5

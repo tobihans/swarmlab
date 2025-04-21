@@ -2,10 +2,13 @@
 
 set -aeuo pipefail
 
+# shellcheck disable=SC2016
+
+ENVSUBST_FORMAT='$SSH_PUBLIC_KEY,$LIMITS_MEMORY'
+INCUS_IMAGE=images:ubuntu/24.04/cloud
+INCUS_PROJECT=swarmlab
 MANAGER_MEMORY_LIMIT=1024MiB
 WORKER_MEMORY_LIMIT=2048MiB
-# shellcheck disable=SC2016
-ENVSUBST_FORMAT='$SSH_PUBLIC_KEY,$LIMITS_MEMORY'
 
 usage() {
   echo "Usage: swarmlab COMMAND"
@@ -15,10 +18,10 @@ usage() {
 }
 
 _up() {
-  if incus project show swarmlab >/dev/null; then
-    echo "Project swarmlab already exists"
+  if incus project show "$INCUS_PROJECT" >/dev/null; then
+    echo "Project $INCUS_PROJECT already exists"
   else
-    incus project create swarmlab <./config/project.yml
+    incus project create "$INCUS_PROJECT" <./config/project.yml
   fi
 
   if [ -z "$SSH_PUBLIC_KEY" ]; then
@@ -27,10 +30,13 @@ _up() {
   fi
 
   for i in {1..3}; do
-    SSH_PUBLIC_KEY=$SSH_PUBLIC_KEY LIMITS_MEMORY=$MANAGER_MEMORY_LIMIT envsubst $ENVSUBST_FORMAT <./config/vm.yml
-    echo "$i"
+    LIMITS_MEMORY=$MANAGER_MEMORY_LIMIT envsubst $ENVSUBST_FORMAT <./config/vm.yml | incus launch "$INCUS_IMAGE" "manager$i" --vm --project "$INCUS_PROJECT"
+    LIMITS_MEMORY=$WORKER_MEMORY_LIMIT envsubst $ENVSUBST_FORMAT <./config/vm.yml | incus launch "$INCUS_IMAGE" "worker$i" --vm --project "$INCUS_PROJECT"
   done
+}
 
+_ps() {
+  incus ls --project "$INCUS_PROJECT" -c ns4
 }
 
 main() {
@@ -42,6 +48,9 @@ main() {
   "up")
     echo "Calling up subcommand"
     _up
+    ;;
+  "ps")
+    _ps
     ;;
   *)
     usage

@@ -7,5 +7,4 @@ config:
   features.storage.volumes: false
   images.auto_update_cached: false
   limits.virtual-machines: 10
-name: swarmlab
 description: Experimental lab for Docker Swarm
