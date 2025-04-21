@@ -1,0 +1,31 @@
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    allow_public_ssh_keys: true
+    disable_root: true
+    disable_root_opts: no-port-forwarding,no-agent-forwarding,no-X11-forwarding
+    groups:
+      - docker: [ubuntu]
+    package_update: true
+    package_upgrade: true
+    packages:
+      - ca-certificates
+      - curl
+    runcmd:
+      - install -m 0755 -d /etc/apt/keyrings
+      - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+      - chmod a+r /etc/apt/keyrings/docker.asc
+      - echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+      - apt-get update
+      - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      - touch /tmp/cloud-init-complete
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAGEA3FSyQwBI6Z+nCSjUU
+      - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA3I7VUf2l5gSn5uavROsc5HRDpZ
+    ssh_deletekeys: true
+    user:
+      name: ubuntu
+      sudo: ALL=(ALL) NOPASSWD:ALL
+  environment.TERM: xterm
+  limits.cpu: "2"
+  limits.memory: 1024MiB
