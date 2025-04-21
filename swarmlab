@@ -17,6 +17,7 @@ Manage your experimental swarm cluster with incus.
 Usage: swarmlab COMMAND
 Commands:
 - up Create the swarmlab project
+- down Teardown the swarmlab project
 - ps Checks the state of the instances
 - stop Stop the instances
 - start Start previously stopped instances
@@ -75,6 +76,7 @@ main() {
 
   case "$1" in
   "up") _up ;;
+  "down") _down ;;
   "ps") incus ls -c ns4 -f compact ;;
   "stop") _stop ;;
   "start") _start ;;
