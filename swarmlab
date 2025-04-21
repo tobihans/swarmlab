@@ -11,32 +11,51 @@ MANAGER_MEMORY_LIMIT=1024MiB
 WORKER_MEMORY_LIMIT=2048MiB
 
 usage() {
-  echo "Usage: swarmlab COMMAND"
-  echo ""
-  echo "Commands:"
-  echo "  up    Create the swarmlab project"
+  cat <<END
+Usage: swarmlab COMMAND
+Commands:
+- up Create the swarmlab project
+- ps Checks the state of the instances
+- stop Stop the instances
+- start Start previously stopped instances
+END
+}
+
+_setup_project() {
+  CURRENT_PROJECT=$(incus project get-current)
+
+  revert() {
+    incus project switch "$CURRENT_PROJECT"
+  }
+
+  incus project show "$INCUS_PROJECT" >/dev/null || incus project create "$INCUS_PROJECT" <./config/project.yml
+  incus project switch "$INCUS_PROJECT"
+
+  trap revert EXIT
 }
 
 _up() {
-  if incus project show "$INCUS_PROJECT" >/dev/null; then
-    echo "Project $INCUS_PROJECT already exists"
-  else
-    incus project create "$INCUS_PROJECT" <./config/project.yml
-  fi
-
   if [ -z "$SSH_PUBLIC_KEY" ]; then
     echo "SSH_PUBLIC_KEY isn't set. It is needed for SSH operations."
     exit 2
   fi
 
   for i in {1..3}; do
-    LIMITS_MEMORY=$MANAGER_MEMORY_LIMIT envsubst $ENVSUBST_FORMAT <./config/vm.yml | incus launch "$INCUS_IMAGE" "manager$i" --vm --project "$INCUS_PROJECT"
-    LIMITS_MEMORY=$WORKER_MEMORY_LIMIT envsubst $ENVSUBST_FORMAT <./config/vm.yml | incus launch "$INCUS_IMAGE" "worker$i" --vm --project "$INCUS_PROJECT"
+    LIMITS_MEMORY=$MANAGER_MEMORY_LIMIT envsubst $ENVSUBST_FORMAT <./config/vm.yml | incus launch "$INCUS_IMAGE" "manager$i" --vm
+    LIMITS_MEMORY=$WORKER_MEMORY_LIMIT envsubst $ENVSUBST_FORMAT <./config/vm.yml | incus launch "$INCUS_IMAGE" "worker$i" --vm
   done
 }
 
-_ps() {
-  incus ls --project "$INCUS_PROJECT" -c ns4
+_start() {
+  for i in {1..3}; do
+    incus start "manager$i" "worker$i"
+  done
+}
+
+_stop() {
+  for i in {1..3}; do
+    incus stop "manager$i" "worker$i"
+  done
 }
 
 main() {
@@ -44,10 +63,14 @@ main() {
     usage && exit 1
   fi
 
+  _setup_project
+
   case "$1" in
   "up") _up ;;
-  "ps") _ps ;;
-  *) usage ;;
+  "ps") incus ls -c ns4 -f compact ;;
+  "stop") _stop ;;
+  "start") _start ;;
+  *) usage && _setup_project ;;
   esac
 }
 
