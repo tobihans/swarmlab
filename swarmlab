@@ -45,16 +45,9 @@ main() {
   fi
 
   case "$1" in
-  "up")
-    echo "Calling up subcommand"
-    _up
-    ;;
-  "ps")
-    _ps
-    ;;
-  *)
-    usage
-    ;;
+  "up") _up ;;
+  "ps") _ps ;;
+  *) usage ;;
   esac
 }
 
