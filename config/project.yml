@@ -1,0 +1,11 @@
+config:
+  features.images: false
+  features.networks.zones: false
+  features.networks: false
+  features.profiles: false
+  features.storage.buckets: false
+  features.storage.volumes: false
+  images.auto_update_cached: false
+  limits.virtual-machines: 10
+name: swarmlab
+description: Experimental lab for Docker Swarm
