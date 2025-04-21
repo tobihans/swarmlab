@@ -12,6 +12,8 @@ WORKER_MEMORY_LIMIT=2048MiB
 
 usage() {
   cat <<END
+Manage your experimental swarm cluster with incus.
+
 Usage: swarmlab COMMAND
 Commands:
 - up Create the swarmlab project
@@ -70,7 +72,7 @@ main() {
   "ps") incus ls -c ns4 -f compact ;;
   "stop") _stop ;;
   "start") _start ;;
-  *) usage && _setup_project ;;
+  *) usage ;;
   esac
 }
 
