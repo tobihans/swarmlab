@@ -1,4 +1,6 @@
-# Trying Docker Swarm mode
+# SwarmLab
+
+This is an experiment to create a simple Docker swarm cluster with HA based on incus.
 
 ## Snippets
 
@@ -21,4 +23,3 @@ incus config set debian-test-vm limits.memory=1024MiB
 incus remote add docker https://docker.io --protocol=oci
 ```
 
-- 
